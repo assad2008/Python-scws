@@ -121,7 +121,7 @@ static PyMethodDef ScwsMethods[] = {
     {"scws_set_xdb",  scws_set_xdb, METH_VARARGS, ""},
     {"scws_set_charset",  scws_scws_set_charset, METH_VARARGS, ""},
     {"scws_new",  scws_scws_new, METH_VARARGS, ""},
-	{"scws_free",  scws_scws_free, METH_VARARGS, ""},
+    {"scws_free",  scws_scws_free, METH_VARARGS, ""},
     {"scws_set_ignore", scws_scws_set_ignore, METH_VARARGS, ""},
     {"scws_set_multi", scws_scws_set_multi, METH_VARARGS, ""},
     {"scws_set_duality", scws_scws_set_duality, METH_VARARGS, ""},
