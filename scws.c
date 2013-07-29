@@ -1,6 +1,6 @@
 #include <Python.h>
-#include "scws.h"
 #include <string.h>
+#include "scws.h"
 
 typedef struct {
     PyObject_HEAD
@@ -76,14 +76,24 @@ static PyObject * scws_scws_set_duality(PyObject * self,PyObject * args){
     if (!PyArg_ParseTuple(args, "i",&mode)){
         return NULL;
     }
-    scws_set_ignore(s, mode);
+    scws_set_duality(s, mode);
+    /* scws_set_ignore(s, mode); */
     return Py_BuildValue("i",1);	
 }
 
+static PyObject * scws_scws_set_debug(PyObject * self,PyObject * args){
+	const int mode;
+    if (!PyArg_ParseTuple(args, "i",&mode)){
+        return NULL;
+    }
+    scws_set_debug(s, mode);
+    /* scws_set_ignore(s, mode); */
+    return Py_BuildValue("i",1);	
+}
 
 static PyObject * scws_get_res(PyObject * self,PyObject * args){
     const char *text;
-    int sts;
+    /* int sts; */
 
     if (!PyArg_ParseTuple(args, "s",&text))
         return NULL;
@@ -91,13 +101,13 @@ static PyObject * scws_get_res(PyObject * self,PyObject * args){
     scws_res_t res, cur;
     scws_send_text(s, text, strlen(text));
     PyObject * v;
-    int i = 0;
-    int total = 0;
-    long idf;
-    scws_res_t head;
+    /* int i = 0; */
+    /* int total = 0; */
+    /* long idf; */
+    /* scws_res_t head; */
     v = PyList_New(0);
-    double d;
-    while (res = cur = scws_get_result(s))
+    /* double d; */
+    while ((res = (cur = scws_get_result(s))))
     {
         while(cur != NULL){
             PyList_Append(v,Py_BuildValue("(O,O,d)",
@@ -111,11 +121,42 @@ static PyObject * scws_get_res(PyObject * self,PyObject * args){
     return Py_BuildValue("O",v);
 }
 
+static PyObject * scws_get_top(PyObject * self,PyObject * args){
+    char *text;
+	int limit;
+	char *xattr;
+    /* int sts; */
+
+    if (!PyArg_ParseTuple(args, "sis", &text, &limit, &xattr))
+        return NULL;
+
+    scws_top_t res, cur;
+    scws_send_text(s, text, strlen(text));
+    PyObject * v;
+    /* int i = 0; */
+    /* int total = 0; */
+    /* long idf; */
+    /* scws_res_t head; */
+    v = PyList_New(0);
+    /* double d; */
+    res = cur = scws_get_tops(s, limit, xattr);
+	while(cur != NULL){
+		PyList_Append(v,Py_BuildValue("(O,O,d)",
+					PyString_FromString(cur->word),
+					PyString_FromStringAndSize(cur->attr, 2),
+					cur->weight));
+		cur = cur->next;
+	}
+    scws_free_tops(res);
+    return Py_BuildValue("O",v);
+}
+
 static PyObject * 
 scws_scws_free(PyObject * self,PyObject * args){
     scws_free(s);
     return Py_BuildValue("i", 1);
 }
+
 static PyMethodDef ScwsMethods[] = {
     {"scws_set_rule",  scws_scws_set_rule, METH_VARARGS, ""},
     {"scws_set_xdb",  scws_set_xdb, METH_VARARGS, ""},
@@ -123,10 +164,12 @@ static PyMethodDef ScwsMethods[] = {
     {"scws_new",  scws_scws_new, METH_VARARGS, ""},
     {"scws_free",  scws_scws_free, METH_VARARGS, ""},
     {"scws_set_ignore", scws_scws_set_ignore, METH_VARARGS, ""},
+    {"scws_set_debug", scws_scws_set_debug, METH_VARARGS, ""},
     {"scws_set_multi", scws_scws_set_multi, METH_VARARGS, ""},
     {"scws_set_duality", scws_scws_set_duality, METH_VARARGS, ""},
     {"scws_add_dict", scws_scws_add_dict, METH_VARARGS, ""},
-    {"get_res",  scws_get_res, METH_VARARGS, ""},
+    {"get_res", scws_get_res, METH_VARARGS, ""},
+	{"get_top", scws_get_top, METH_VARARGS, ""},
     {NULL, NULL, 0, NULL}
 };
     PyMODINIT_FUNC
